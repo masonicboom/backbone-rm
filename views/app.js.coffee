@@ -35,6 +35,10 @@ BackboneRM.where = (model, conditions, callback) ->
       error
 
 Backbone.Model.prototype.insert = () -> BackboneRM.insert(this)
+_.extend Backbone.Model,
+  where: (conditions, callback) ->
+    model = this.prototype.constructor
+    BackboneRM.where(model, conditions, callback)
 
 Animal = Backbone.Model.extend {},
   tableName: 'animals'
@@ -48,4 +52,4 @@ new Animal({ id: 1, name: 'Lion' }).insert()
 new Animal({ id: 2, name: 'Tiger' }).insert()
 new Animal({ id: 3, name: 'Steve Ballmer' }).insert()
 
-BackboneRM.where(Animal, 'id = 2', (models) -> console.log(models))
+Animal.where('id = 2', (models) -> console.log(models))
