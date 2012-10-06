@@ -39,6 +39,9 @@ _.extend Backbone.Model,
   where: (conditions, callback) ->
     model = this.prototype.constructor
     BackboneRM.where(model, conditions, callback)
+  createTable: () ->
+    model = this.prototype.constructor
+    BackboneRM.createTable(model)
 
 Animal = Backbone.Model.extend {},
   tableName: 'animals'
@@ -46,7 +49,7 @@ Animal = Backbone.Model.extend {},
     id: 'INTEGER'
     name: 'VARCHAR(20)'
 
-BackboneRM.createTable(Animal)
+Animal.createTable()
 
 new Animal({ id: 1, name: 'Lion' }).insert()
 new Animal({ id: 2, name: 'Tiger' }).insert()
