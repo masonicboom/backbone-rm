@@ -2,8 +2,8 @@ root = this
 BackboneRM = root.BackboneRM = {}
 BackboneRM.db = window.openDatabase("bbrmdb", "1.0", "Test DB", 200000)
 
-BackboneRM.createTable = (model) ->
-  BackboneRM.db.transaction (tx) ->
+BackboneRM.createTable = (db, model) ->
+  db.transaction (tx) ->
     columns = ("#{name} #{type}" for name, type of model.schema)
     sql = "CREATE TABLE IF NOT EXISTS `#{model.tableName}` (#{columns.join(',')})"
     success = () -> console.log('Success creating table')
@@ -13,8 +13,8 @@ BackboneRM.createTable = (model) ->
       success,
       error
 
-BackboneRM.insert = (modelInstance) ->
-  BackboneRM.db.transaction (tx) ->
+BackboneRM.insert = (db, modelInstance) ->
+  db.transaction (tx) ->
     model = modelInstance.constructor
     sql = "INSERT INTO `#{model.tableName}` VALUES (?,?)"
     success = () -> console.log('Success inserting values')
@@ -22,8 +22,8 @@ BackboneRM.insert = (modelInstance) ->
     rowData = (modelInstance.get(key) for key, type of model.schema)
     tx.executeSql(sql, rowData, success, error)
 
-BackboneRM.where = (model, conditions, callback) ->
-  BackboneRM.db.transaction (tx) ->
+BackboneRM.where = (db, model, conditions, callback) ->
+  db.transaction (tx) ->
     sql = "SELECT * FROM `#{model.tableName}` WHERE #{conditions}"
     success = (tx, r) ->
       rows = (new model(r.rows.item(i)) for i in [10..1])
@@ -34,14 +34,21 @@ BackboneRM.where = (model, conditions, callback) ->
       success,
       error
 
-Backbone.Model.prototype.insert = () -> BackboneRM.insert(this)
+Backbone.Model.prototype.insert = () ->
+  db = this.constructor.dbHandle()
+  BackboneRM.insert(db, this)
+
 _.extend Backbone.Model,
+  dbHandle: () ->
+    BackboneRM.db
   where: (conditions, callback) ->
+    db = this.dbHandle()
     model = this.prototype.constructor
-    BackboneRM.where(model, conditions, callback)
+    BackboneRM.where(db, model, conditions, callback)
   createTable: () ->
+    db = this.dbHandle()
     model = this.prototype.constructor
-    BackboneRM.createTable(model)
+    BackboneRM.createTable(db, model)
 
 Animal = Backbone.Model.extend {},
   tableName: 'animals'
