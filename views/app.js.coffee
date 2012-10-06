@@ -1,4 +1,5 @@
 Animal = Backbone.Model.extend {},
+  dbName: 'demo'
   tableName: 'animals'
   schema:
     id: 'INTEGER'

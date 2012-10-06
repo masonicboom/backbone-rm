@@ -1,6 +1,7 @@
 root = this
 BackboneRM = root.BackboneRM = {}
-BackboneRM.db = window.openDatabase("bbrmdb", "1.0", "Test DB", 200000)
+BackboneRM.dbConnect = _.memoize (dbName) ->
+  window.openDatabase(dbName, "1.0", "Test DB", 200000)
 
 BackboneRM.createTable = (db, model) ->
   db.transaction (tx) ->
@@ -26,7 +27,7 @@ BackboneRM.where = (db, model, conditions, callback) ->
   db.transaction (tx) ->
     sql = "SELECT * FROM `#{model.tableName}` WHERE #{conditions}"
     success = (tx, r) ->
-      rows = (new model(r.rows.item(i)) for i in [10..1])
+      rows = (new model(r.rows.item(i)) for i in [0...(r.rows.length)])
       callback(rows)
     error = (tx, e) -> console.log('Error selecting stuff', e)
     tx.executeSql sql,
@@ -36,11 +37,14 @@ BackboneRM.where = (db, model, conditions, callback) ->
 
 _.extend Backbone.Model,
   dbHandle: () ->
-    BackboneRM.db
+    model = this.prototype.constructor
+    BackboneRM.dbConnect(model.dbName)
+
   where: (conditions, callback) ->
     db = this.dbHandle()
     model = this.prototype.constructor
     BackboneRM.where(db, model, conditions, callback)
+
   createTable: () ->
     db = this.dbHandle()
     model = this.prototype.constructor
