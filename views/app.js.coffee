@@ -22,6 +22,18 @@ BackboneRM.insert = (modelInstance) ->
     rowData = (modelInstance.get(key) for key, type of model.schema)
     tx.executeSql(sql, rowData, success, error)
 
+BackboneRM.where = (model, conditions, callback) ->
+  BackboneRM.db.transaction (tx) ->
+    sql = "SELECT * FROM `#{model.tableName}` WHERE #{conditions}"
+    success = (tx, r) ->
+      rows = (new model(r.rows.item(i)) for i in [10..1])
+      callback(rows)
+    error = (tx, e) -> console.log('Error selecting stuff', e)
+    tx.executeSql sql,
+      [],
+      success,
+      error
+
 
 Animal = Backbone.Model.extend {},
   tableName: 'animals'
@@ -34,3 +46,5 @@ BackboneRM.createTable(Animal)
 BackboneRM.insert(new Animal({ id: 1, name: 'Lion' }))
 BackboneRM.insert(new Animal({ id: 2, name: 'Tiger' }))
 BackboneRM.insert(new Animal({ id: 3, name: 'Steve Ballmer' }))
+
+BackboneRM.where(Animal, 'id = 2', (models) -> console.log(models))
