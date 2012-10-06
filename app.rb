@@ -12,3 +12,7 @@ end
 get '/app.js' do
   coffee :'app.js'
 end
+
+get '/bkbonerm.js' do
+  coffee :'bkbonerm.js'
+end
