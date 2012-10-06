@@ -34,6 +34,7 @@ BackboneRM.where = (model, conditions, callback) ->
       success,
       error
 
+Backbone.Model.prototype.insert = () -> BackboneRM.insert(this)
 
 Animal = Backbone.Model.extend {},
   tableName: 'animals'
@@ -43,8 +44,8 @@ Animal = Backbone.Model.extend {},
 
 BackboneRM.createTable(Animal)
 
-BackboneRM.insert(new Animal({ id: 1, name: 'Lion' }))
-BackboneRM.insert(new Animal({ id: 2, name: 'Tiger' }))
-BackboneRM.insert(new Animal({ id: 3, name: 'Steve Ballmer' }))
+new Animal({ id: 1, name: 'Lion' }).insert()
+new Animal({ id: 2, name: 'Tiger' }).insert()
+new Animal({ id: 3, name: 'Steve Ballmer' }).insert()
 
 BackboneRM.where(Animal, 'id = 2', (models) -> console.log(models))
