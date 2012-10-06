@@ -27,8 +27,9 @@ BackboneRM.where = (db, model, conditions, callback) ->
   db.transaction (tx) ->
     sql = "SELECT * FROM `#{model.tableName}` WHERE #{conditions}"
     success = (tx, r) ->
-      rows = (new model(r.rows.item(i)) for i in [0...(r.rows.length)])
-      callback(rows)
+      rows = (r.rows.item(i) for i in [0...(r.rows.length)])
+      collection = model.collection || Backbone.Collection.extend({ model: model })
+      callback(new collection(rows))
     error = (tx, e) -> console.log('Error selecting stuff', e)
     tx.executeSql sql,
       [],
