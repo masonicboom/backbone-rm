@@ -17,7 +17,8 @@ BackboneRM.createTable = (db, model) ->
 BackboneRM.insert = (db, modelInstance) ->
   db.transaction (tx) ->
     model = modelInstance.constructor
-    sql = "INSERT INTO `#{model.tableName}` VALUES (?,?)"
+    placeholders = ('?' for key, value of model.schema).join(',')
+    sql = "INSERT INTO `#{model.tableName}` VALUES (#{placeholders})"
     success = () -> console.log('Success inserting values')
     error = (tx, e) -> console.log('Error inserting values', e)
     rowData = (modelInstance.get(key) for key, type of model.schema)
@@ -55,3 +56,5 @@ Backbone.Model.prototype.insert = () ->
   db = this.constructor.dbHandle()
   BackboneRM.insert(db, this)
 
+Backbone.Collection.prototype.insert = () ->
+  this.each((model) -> model.insert())
